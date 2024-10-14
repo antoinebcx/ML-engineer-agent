@@ -6,7 +6,7 @@ It supports regression and classification tasks.
 
 In your terminal, run:
 
-```python main.py --data .../data/housing.csv --task regression --target median_house_value --iterations 5 --output results```
+```python main.py --data data/housing.csv --task regression --target median_house_value --iterations 5 --output results```
 
 - `--data`: path to your csv
 - `--task`: regression or classification
@@ -14,9 +14,10 @@ In your terminal, run:
 - `--iterations`: number of iterations to run
 - `--output`: the folder in which you want to store the iteration outputs and the best model code
 
-
+It will start the optimization process and output the step:
 ```Initializing AI Agent for regression task...
-Loading data from .../data/housing.csv
+Loading data from data/housing.csv
 Starting optimization process for 3 iterations...
 MSE: 3354991560.466231, R² Score: 0.7439737046849305
-New best model found! Score: 0.7440```
+New best model found! Score: 0.7440
+...

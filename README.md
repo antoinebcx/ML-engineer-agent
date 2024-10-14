@@ -13,3 +13,10 @@ In your terminal, run:
 - `--target`: the target variable
 - `--iterations`: number of iterations to run
 - `--output`: the folder in which you want to store the outputs
+
+
+```Initializing AI Agent for regression task...
+Loading data from .../data/housing.csv
+Starting optimization process for 3 iterations...
+MSE: 3354991560.466231, R² Score: 0.7439737046849305
+New best model found! Score: 0.7440```

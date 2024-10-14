@@ -34,8 +34,6 @@ def main():
     best_model = agent.get_best_model()
     print("\nOptimization complete!")
     print(f"Best model achieved a score of {best_model.score:.4f} on iteration {best_model.iteration}")
-    print("\nBest model code:")
-    print(best_model.code)
     
     print("\nSaving best model...")
     result_manager.save_best_model(best_model)

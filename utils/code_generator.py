@@ -55,8 +55,10 @@ class CodeGenerator:
 
         ----
 
-        Give only the runnable code and only that.
-        Your output will be imported and used in another Python script.
+        Give only the runnable code in the given format and only that.
+        There should be a correct `Model` class with `fit` and `predict`methods.
+        You can use intermediary steps but make sure this class and its methods are working and are enough for evaluation.
+        Your output will be imported and used in another Python script to evaluate it.
         The code has to work, output only the best code.
         """
 

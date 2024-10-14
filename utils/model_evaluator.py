@@ -9,10 +9,14 @@ class ModelEvaluator:
         self.task_type = task_type
 
     def clean_code(self, code):
-        # Remove ```python and ``` delimiters
-        code = re.sub(r'```python\s*', '', code)
-        code = re.sub(r'```\s*$', '', code)
-        # Remove any leading or trailing whitespace
+        # Extract content between ```python and ``` delimiters or remove them
+        match = re.search(r'```python\s*([\s\S]*?)\s*```', code)
+        if match:
+            code = match.group(1)
+        else:
+            code = re.sub(r'```python\s*', '', code)
+            code = re.sub(r'```\s*$', '', code)
+        
         code = code.strip()
         return code
 

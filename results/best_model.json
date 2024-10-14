@@ -1,0 +1,35 @@
+{
+  "iteration": 2,
+  "code": "```python\nimport numpy as np\nimport pandas as pd\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\n\ndef preprocess_data(X):\n    # Define categorical and numerical columns\n    categorical_cols = ['ocean_proximity']\n    numerical_cols = ['longitude', 'latitude', 'housing_median_age', 'total_rooms', \n                      'total_bedrooms', 'population', 'households', 'median_income']\n    \n    # Preprocessing for numerical data\n    numerical_transformer = Pipeline(steps=[\n        ('imputer', SimpleImputer(strategy='median')),\n        ('scaler', StandardScaler())\n    ])\n    \n    # Preprocessing for categorical data\n    categorical_transformer = Pipeline(steps=[\n        ('imputer', SimpleImputer(strategy='most_frequent')),\n        ('onehot', OneHotEncoder(handle_unknown='ignore'))\n    ])\n    \n    # Combine preprocessing steps\n    preprocessor = ColumnTransformer(\n        transformers=[\n            ('num', numerical_transformer, numerical_cols),\n            ('cat', categorical_transformer, categorical_cols)\n        ])\n    \n    # Apply transformations\n    X_preprocessed = preprocessor.fit_transform(X)\n    return X_preprocessed\n\nclass Model:\n    def __init__(self):\n        self.model = RandomForestRegressor(\n            bootstrap=True,\n            ccp_alpha=0.0,\n            criterion='squared_error',\n            max_depth=12,  # Slightly increased max_depth for potential improvement\n            max_features='sqrt',  # Changed max_features to 'sqrt' for better generalization\n            n_estimators=150,  # Increased number of estimators for better performance\n            random_state=42\n        )\n        self.preprocessor = None\n\n    def fit(self, X, y):\n        # Preprocess data\n        self.preprocessor = ColumnTransformer(\n            transformers=[\n                ('num', Pipeline(steps=[\n                    ('imputer', SimpleImputer(strategy='median')),\n                    ('scaler', StandardScaler())\n                ]), ['longitude', 'latitude', 'housing_median_age', 'total_rooms', \n                     'total_bedrooms', 'population', 'households', 'median_income']),\n                ('cat', Pipeline(steps=[\n                    ('imputer', SimpleImputer(strategy='most_frequent')),\n                    ('onehot', OneHotEncoder(handle_unknown='ignore'))\n                ]), ['ocean_proximity'])\n            ])\n        \n        X_preprocessed = self.preprocessor.fit_transform(X)\n        # Fit the model\n        self.model.fit(X_preprocessed, y)\n\n    def predict(self, X):\n        # Preprocess data\n        X_preprocessed = self.preprocessor.transform(X)\n        # Predict using the model\n        return self.model.predict(X_preprocessed)\n```\n",
+  "score": 0.7840572546941342,
+  "features_used": [
+    "longitude",
+    "latitude",
+    "housing_median_age",
+    "total_rooms",
+    "total_bedrooms",
+    "population",
+    "households",
+    "median_income",
+    "ocean_proximity"
+  ],
+  "hyperparameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "criterion": "squared_error",
+    "max_depth": 12,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "n_estimators": 150,
+    "n_jobs": null,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  }
+}

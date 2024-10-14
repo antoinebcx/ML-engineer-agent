@@ -12,7 +12,7 @@ In your terminal, run:
 - `--task`: regression or classification
 - `--target`: the target variable
 - `--iterations`: number of iterations to run
-- `--output`: the folder in which you want to store the outputs
+- `--output`: the folder in which you want to store the iteration outputs and the best model code
 
 
 ```Initializing AI Agent for regression task...

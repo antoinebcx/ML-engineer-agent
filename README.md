@@ -1,4 +1,4 @@
-ML-engineer-agent automatically loads a dataset, writes the Python code to prepare the data and build a model, evaluates on relavant metrics and iterates until finding the best solution.
+ML-engineer-agent automatically loads a dataset, writes the Python code to prepare the data and build a model, evaluates on the relevant metrics and iterates until finding the best solution.
 
 It supports regression and classification tasks.
 

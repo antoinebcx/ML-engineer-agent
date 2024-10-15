@@ -1,6 +1,6 @@
 import importlib.util
 import sys
-from sklearn.metrics import mean_squared_error, r2_score, f1_score
+from sklearn.metrics import root_mean_squared_error, r2_score, f1_score, accuracy_score
 import numpy as np
 
 class ModelEvaluator:
@@ -28,12 +28,15 @@ class ModelEvaluator:
 
             # Evaluate the model
             if self.task_type == 'regression':
-                mse = mean_squared_error(data['y_val'], y_pred)
+                rmse = root_mean_squared_error(data['y_val'], y_pred)
                 r2 = r2_score(data['y_val'], y_pred)
-                score = r2  # Use R² score instead of negative MSE
-                print(f"MSE: {mse}, R² Score: {r2}")
-            else:  # classification
-                score = f1_score(data['y_val'], y_pred, average='weighted')
+                score = rmse
+                print(f"RMSE: {rmse}, R²: {r2}")
+            elif self.task_type == 'classification':
+                f1 = f1_score(data['y_val'], y_pred, average='weighted')
+                accuracy = accuracy_score(data['y_val'], y_pred, average='weighted')
+                score = f1
+                print(f"F-score: {score}, Accuracy: {accuracy}")
 
             # Get features used
             features_used = list(data['X_train'].columns)  # Assumes all features are used

@@ -112,7 +112,7 @@ class AIAgent:
         ----
 
         You have access to the following libraries:
-        pandas, numpy, scikit-learn, lightgbm, xgboost
+        pandas, numpy, scikit-learn, xgboost
 
         Follow best practices for data preparation (encoding, scaling...) and machine learning.
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.

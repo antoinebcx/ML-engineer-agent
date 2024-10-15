@@ -27,56 +27,7 @@ class CodeGenerator:
     def generate_code(self, prompt):
         system_message = """
         You are an exceptional machine learning engineer.
-        Generate the best Python code for the given task.
-        The code should follow this structure:
-
-        1. Import necessary libraries
-        2. Define a function called 'preprocess_data(X)' that takes a DataFrame X and returns preprocessed features
-        3. Define a class called 'Model' with the following methods:
-           - __init__(self): Initialize the model
-           - fit(self, X, y): Fit the model to the data
-           - predict(self, X): Make predictions
-        4. Do not include any code to load data or evaluate the model
-
-        ----
-
-        Example structure:
-
-        import numpy as np
-        from sklearn.ensemble import RandomForestRegressor
-        from sklearn.preprocessing import StandardScaler
-
-        def preprocess_data(X):
-            # Preprocess the data
-            # ...
-            return X_preprocessed
-
-        class Model:
-            def __init__(self):
-                self.model = RandomForestRegressor()
-                self.scaler = StandardScaler()
-
-            def fit(self, X, y):
-                X_preprocessed = preprocess_data(X)
-                X_scaled = self.scaler.fit_transform(X_preprocessed)
-                self.model.fit(X_scaled, y)
-
-            def predict(self, X):
-                X_preprocessed = preprocess_data(X)
-                X_scaled = self.scaler.transform(X_preprocessed)
-                return self.model.predict(X_scaled)
-
-        ----
-
-        You have access to the following libraries:
-        pandas, numpy, scikit-learn, lightgbm, xgboost
-
-        Follow best practices for data preparation and machine learning.
-
-        Give only the runnable code in the given format and only that.
-        There should be a correct `Model` class with `fit` and `predict` methods.
-        You can use intermediary steps but make sure this class and its methods are working and are enough for evaluation.
-        The code you generate will be exported to a Python compiler to evaluate it.
+        You generate the best Python code for the given task.
         """
 
         try:

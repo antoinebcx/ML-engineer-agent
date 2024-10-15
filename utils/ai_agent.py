@@ -69,8 +69,6 @@ class AIAgent:
         Based on this information, you have to build an even better model, focusing on:
         1. Feature selection and engineering
         2. Model architecture (appropriate for {self.task_type})
-        3. Hyperparameter tuning
-        4. Ensemble methods (if appropriate)
 
         ----
 
@@ -82,6 +80,7 @@ class AIAgent:
            - fit(self, X, y): Fit the model to the data
            - predict(self, X): Make predictions
         4. Do not include any code to load data, train/test split or evaluate the model
+        5. Do not use heavy grid search or automated hyperparameter optimization methods as it is an iterative process
 
         Example structure:
         ```python

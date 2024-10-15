@@ -81,7 +81,7 @@ class AIAgent:
            - __init__(self): Initialize the model
            - fit(self, X, y): Fit the model to the data
            - predict(self, X): Make predictions
-        4. Do not include any code to load data or evaluate the model
+        4. Do not include any code to load data, train/test split or evaluate the model
 
         Example structure:
         ```python
@@ -119,8 +119,13 @@ class AIAgent:
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
 
         Provide only the runnable code in the specified format.
-        The code you generate will be exported to a Python compiler for evaluation,
-        so ensure it's complete and executable without any additional context or explanation outside the code itself.
+        The code you generate will be exported to a Python compiler for evaluation:
+        ```python
+        model = generated_model.Model()
+        model.fit(data['X_train'], data['y_train'])
+        y_pred = model.predict(data['X_val'])
+        ```
+        So ensure it's complete and executable without any additional context or explanation outside the code itself.
         """
         
         return prompt

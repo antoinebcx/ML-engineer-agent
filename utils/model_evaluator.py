@@ -51,11 +51,10 @@ class ModelEvaluator:
             else:  # classification
                 score = f1_score(data['y_val'], y_pred, average='weighted')
 
-            # Get features used and hyperparameters
+            # Get features used
             features_used = list(data['X_train'].columns)  # Assumes all features are used
-            hyperparameters = model.model.get_params() if hasattr(model.model, 'get_params') else {}
 
-            return score, features_used, hyperparameters
+            return score, features_used
         except Exception as e:
             print(f"Error evaluating code: {str(e)}")
             return float('-inf'), [], {}

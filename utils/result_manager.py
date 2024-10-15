@@ -19,8 +19,7 @@ class ResultManager:
                 'iteration': iteration.iteration,
                 'code': iteration.code,
                 'score': iteration.score,
-                'features_used': iteration.features_used,
-                'hyperparameters': iteration.hyperparameters
+                'features_used': iteration.features_used
             }, f, indent=2)
 
     def get_recent_iterations(self, n=5):
@@ -39,8 +38,7 @@ class ResultManager:
                 'iteration': best_model.iteration,
                 'code': best_model.code,
                 'score': best_model.score,
-                'features_used': best_model.features_used,
-                'hyperparameters': best_model.hyperparameters
+                'features_used': best_model.features_used
             }, f, indent=2)
 
         # Save model code

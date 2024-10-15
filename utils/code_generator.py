@@ -68,16 +68,20 @@ class CodeGenerator:
 
         ----
 
+        You have access to the following libraries:
+        pandas, numpy, scikit-learn, lightgbm, xgboost
+
+        Follow best practices for data preparation and machine learning.
+
         Give only the runnable code in the given format and only that.
-        There should be a correct `Model` class with `fit` and `predict`methods.
+        There should be a correct `Model` class with `fit` and `predict` methods.
         You can use intermediary steps but make sure this class and its methods are working and are enough for evaluation.
-        Your output will be imported and used in another Python script to evaluate it.
-        The code has to work, output only the best code.
+        The code you generate will be exported to a Python compiler to evaluate it.
         """
 
         try:
             response = client.chat.completions.create(
-                model='gpt-4o',
+                model='gpt-4o-2024-08-06',
                 # later, potentially structured outputs or {"type": "json_object"}
                 response_format={"type": "text"},
                 messages=[

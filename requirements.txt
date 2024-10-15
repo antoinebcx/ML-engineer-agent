@@ -3,3 +3,5 @@ scikit-learn
 openai
 python-dotenv
 numpy
+lightgbm
+xgboost

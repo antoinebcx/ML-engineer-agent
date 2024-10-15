@@ -124,7 +124,8 @@ class AIAgent:
         model.fit(data['X_train'], data['y_train'])
         y_pred = model.predict(data['X_val'])
         ```
-        So ensure it's complete and executable without any additional context or explanation outside the code itself.
+        Do not add any other arguments in the `fit` or `predict` methods, they should be executable as just described.
+        Ensure the code complete and executable without any additional context or explanation outside the code itself.
         """
         
         return prompt

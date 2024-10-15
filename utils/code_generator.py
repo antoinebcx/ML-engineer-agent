@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+import re
 
 load_dotenv()
 
@@ -10,6 +11,18 @@ client = OpenAI(api_key=openai_api_key)
 class CodeGenerator:
     def __init__(self):
         pass
+
+    def clean_code(self, code):
+        # Extract content between ```python and ``` delimiters or remove them
+        match = re.search(r'```python\s*([\s\S]*?)\s*```', code)
+        if match:
+            code = match.group(1)
+        else:
+            code = re.sub(r'```python\s*', '', code)
+            code = re.sub(r'```\s*$', '', code)
+        
+        code = code.strip()
+        return code
 
     def generate_code(self, prompt):
         system_message = """
@@ -74,6 +87,6 @@ class CodeGenerator:
                 max_tokens=4000,
                 temperature=0.5
             )
-            return response.choices[0].message.content
+            return self.clean_code(response.choices[0].message.content)
         except Exception as e:
             raise Exception(f"Failed to generate code with GPT: {e}")

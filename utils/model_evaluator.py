@@ -2,32 +2,16 @@ import importlib.util
 import sys
 from sklearn.metrics import mean_squared_error, r2_score, f1_score
 import numpy as np
-import re
 
 class ModelEvaluator:
     def __init__(self, task_type):
         self.task_type = task_type
 
-    def clean_code(self, code):
-        # Extract content between ```python and ``` delimiters or remove them
-        match = re.search(r'```python\s*([\s\S]*?)\s*```', code)
-        if match:
-            code = match.group(1)
-        else:
-            code = re.sub(r'```python\s*', '', code)
-            code = re.sub(r'```\s*$', '', code)
-        
-        code = code.strip()
-        return code
-
     def evaluate_code(self, code, data):
-        try:
-            # Clean the code
-            cleaned_code = self.clean_code(code)
-            
+        try:            
             # Save the cleaned code to a temporary file
             with open('temp_model.py', 'w') as f:
-                f.write(cleaned_code)
+                f.write(code)
 
             # Import the temporary module
             spec = importlib.util.spec_from_file_location("temp_model", "temp_model.py")

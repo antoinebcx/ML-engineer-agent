@@ -8,7 +8,6 @@ class ModelIteration:
     code: str
     score: float
     features_used: List[str]
-    hyperparameters: Dict
 
 class AIAgent:
     def __init__(self, data_handler, code_generator, model_evaluator, result_manager, task_type):
@@ -25,9 +24,9 @@ class AIAgent:
             prompt = self._generate_prompt(i)
             code = self.code_generator.generate_code(prompt)
 
-            score, features_used, hyperparameters = self.model_evaluator.evaluate_code(code, self.data_handler.get_data())
+            score, features_used = self.model_evaluator.evaluate_code(code, self.data_handler.get_data())
             
-            iteration = ModelIteration(i+1, code, score, features_used, hyperparameters)
+            iteration = ModelIteration(i+1, code, score, features_used)
             self.iteration_history.append(iteration)
             self.result_manager.save_iteration(iteration)
             
@@ -43,11 +42,10 @@ class AIAgent:
         best_iterations = self.result_manager.get_best_iterations(3)
         
         feature_importance = self._analyze_feature_importance(recent_iterations)
-        hyperparameter_trends = self._analyze_hyperparameter_trends(recent_iterations)
         
         best_code = self.best_model.code if self.best_model else "No best model yet."
-        
-        return f"""
+
+        prompt = f"""
         You are an expert machine learning engineer tasked with creating the best {self.task_type} model for the given data.
         
         Data summary: {data_info}
@@ -67,21 +65,68 @@ class AIAgent:
         
         Feature importance analysis:
         {feature_importance}
-        
-        Hyperparameter trends:
-        {hyperparameter_trends}
-        
+
         Based on this information, you have to build an even better model, focusing on:
         1. Feature selection and engineering
         2. Model architecture (appropriate for {self.task_type})
         3. Hyperparameter tuning
         4. Ensemble methods (if appropriate)
-        
-        Provide the complete code for the improved model, including necessary imports and data preprocessing steps.
+
+        ----
+
+        The code should follow this structure:
+        1. Import necessary libraries
+        2. Define a function called 'preprocess_data(X)' that takes a DataFrame X and returns preprocessed features
+        3. Define a class called 'Model' with the following methods:
+           - __init__(self): Initialize the model
+           - fit(self, X, y): Fit the model to the data
+           - predict(self, X): Make predictions
+        4. Do not include any code to load data or evaluate the model
+
+        Example structure:
+        ```python
+        import numpy as np
+        from sklearn.ensemble import RandomForestRegressor
+        from sklearn.preprocessing import StandardScaler
+
+        def preprocess_data(X):
+            # Preprocess the data
+            # ...
+            return X_preprocessed
+
+        class Model:
+            def __init__(self):
+                self.model = RandomForestRegressor()
+                self.scaler = StandardScaler()
+
+            def fit(self, X, y):
+                X_preprocessed = preprocess_data(X)
+                X_scaled = self.scaler.fit_transform(X_preprocessed)
+                self.model.fit(X_scaled, y)
+
+            def predict(self, X):
+                X_preprocessed = preprocess_data(X)
+                X_scaled = self.scaler.transform(X_preprocessed)
+                return self.model.predict(X_scaled)
+        ```
+
+        ----
+
+        You have access to the following libraries:
+        pandas, numpy, scikit-learn, lightgbm, xgboost
+
+        Follow best practices for data preparation (encoding, scaling...) and machine learning.
+        Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
+
+        Provide only the runnable code in the specified format.
+        The code you generate will be exported to a Python compiler for evaluation,
+        so ensure it's complete and executable without any additional context or explanation outside the code itself.
         """
+        
+        return prompt
 
     def _format_iterations(self, iterations):
-        return "\n".join([f"Iteration {it.iteration}: Score = {it.score:.4f}, Features = {it.features_used}, Hyperparameters = {it.hyperparameters}" for it in iterations])
+        return "\n".join([f"Iteration {it.iteration}: Score = {it.score:.4f}, Features = {it.features_used}" for it in iterations])
 
     def _analyze_feature_importance(self, iterations):
         feature_scores = {}
@@ -94,25 +139,6 @@ class AIAgent:
         feature_importance = {feature: np.mean(scores) for feature, scores in feature_scores.items()}
         sorted_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
         return "Most important features (based on average score): " + ", ".join([f"{feature} ({score:.4f})" for feature, score in sorted_features[:5]])
-
-    def _analyze_hyperparameter_trends(self, iterations):
-        hyperparameter_values = {}
-        for it in iterations:
-            for param, value in it.hyperparameters.items():
-                if param not in hyperparameter_values:
-                    hyperparameter_values[param] = []
-                hyperparameter_values[param].append((it.iteration, value, it.score))
-        
-        trends = {}
-        for param, values in hyperparameter_values.items():
-            sorted_values = sorted(values, key=lambda x: x[2], reverse=True)  # Sort by score
-            best_value = sorted_values[0]
-            trend = f"Best value: {best_value[1]} (score: {best_value[2]:.4f}, iteration: {best_value[0]})"
-            if len(values) > 1:
-                trend += f"\nTrend: {'Increasing' if values[-1][1] > values[0][1] else 'Decreasing'}"
-            trends[param] = trend
-        
-        return "\n".join([f"{param}: {trend}" for param, trend in trends.items()])
 
     def get_best_model(self):
         return self.best_model

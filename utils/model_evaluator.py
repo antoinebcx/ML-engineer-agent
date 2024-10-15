@@ -1,33 +1,17 @@
 import importlib.util
 import sys
-from sklearn.metrics import mean_squared_error, r2_score, f1_score
+from sklearn.metrics import root_mean_squared_error, r2_score, f1_score, accuracy_score
 import numpy as np
-import re
 
 class ModelEvaluator:
     def __init__(self, task_type):
         self.task_type = task_type
 
-    def clean_code(self, code):
-        # Extract content between ```python and ``` delimiters or remove them
-        match = re.search(r'```python\s*([\s\S]*?)\s*```', code)
-        if match:
-            code = match.group(1)
-        else:
-            code = re.sub(r'```python\s*', '', code)
-            code = re.sub(r'```\s*$', '', code)
-        
-        code = code.strip()
-        return code
-
     def evaluate_code(self, code, data):
-        try:
-            # Clean the code
-            cleaned_code = self.clean_code(code)
-            
+        try:            
             # Save the cleaned code to a temporary file
             with open('temp_model.py', 'w') as f:
-                f.write(cleaned_code)
+                f.write(code)
 
             # Import the temporary module
             spec = importlib.util.spec_from_file_location("temp_model", "temp_model.py")
@@ -44,18 +28,20 @@ class ModelEvaluator:
 
             # Evaluate the model
             if self.task_type == 'regression':
-                mse = mean_squared_error(data['y_val'], y_pred)
+                rmse = root_mean_squared_error(data['y_val'], y_pred)
                 r2 = r2_score(data['y_val'], y_pred)
-                score = r2  # Use R² score instead of negative MSE
-                print(f"MSE: {mse}, R² Score: {r2}")
-            else:  # classification
-                score = f1_score(data['y_val'], y_pred, average='weighted')
+                score = rmse
+                print(f"RMSE: {rmse}, R²: {r2}")
+            elif self.task_type == 'classification':
+                f1 = f1_score(data['y_val'], y_pred, average='weighted')
+                accuracy = accuracy_score(data['y_val'], y_pred, average='weighted')
+                score = f1
+                print(f"F-score: {score}, Accuracy: {accuracy}")
 
-            # Get features used and hyperparameters
+            # Get features used
             features_used = list(data['X_train'].columns)  # Assumes all features are used
-            hyperparameters = model.model.get_params() if hasattr(model.model, 'get_params') else {}
 
-            return score, features_used, hyperparameters
+            return score, features_used
         except Exception as e:
             print(f"Error evaluating code: {str(e)}")
             return float('-inf'), [], {}

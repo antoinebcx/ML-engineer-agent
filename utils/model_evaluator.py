@@ -30,7 +30,7 @@ class ModelEvaluator:
             if self.task_type == 'regression':
                 rmse = root_mean_squared_error(data['y_val'], y_pred)
                 r2 = r2_score(data['y_val'], y_pred)
-                score = rmse
+                score = r2
                 print(f"RMSE: {rmse}, R²: {r2}")
             elif self.task_type == 'classification':
                 f1 = f1_score(data['y_val'], y_pred, average='weighted')

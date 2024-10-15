@@ -1,15 +1,9 @@
-import os
 from openai import OpenAI
-from dotenv import load_dotenv
 import re
 
-load_dotenv()
-
-openai_api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=openai_api_key)
-
 class CodeGenerator:
-    def __init__(self):
+    def __init__(self, api_key):
+        self.client = OpenAI(api_key=api_key)
         pass
 
     def clean_code(self, code):
@@ -31,7 +25,7 @@ class CodeGenerator:
         """
 
         try:
-            response = client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model='gpt-4o-2024-08-06',
                 # later, potentially structured outputs or {"type": "json_object"}
                 response_format={"type": "text"},

@@ -9,6 +9,9 @@ from utils.result_manager import ResultManager
 
 def main():
     load_dotenv()  # load environment variables from .env file
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if not openai_api_key:
+        raise ValueError("OPENAI_API_KEY not found in environment variables")
     
     parser = argparse.ArgumentParser(description="AI Agent for Data Science Tasks")
     parser.add_argument("--data", required=True, help="Path to the CSV data file")
@@ -22,7 +25,7 @@ def main():
     print(f"Loading data from {args.data}")
     
     data_handler = DataHandler(args.data, args.target, args.task)
-    code_generator = CodeGenerator()
+    code_generator = CodeGenerator(openai_api_key)
     model_evaluator = ModelEvaluator(args.task)
     result_manager = ResultManager(args.output)
     

@@ -1,63 +1,62 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
+from sklearn.ensemble import GradientBoostingRegressor
 
 def preprocess_data(X):
-    # Separate numeric and categorical features
-    numeric_features = X.select_dtypes(include=['float64']).columns.tolist()
-    categorical_features = X.select_dtypes(include=['object']).columns.tolist()
+    # Identify numerical and categorical columns
+    numerical_features = ['longitude', 'latitude', 'housing_median_age', 'total_rooms', 
+                          'total_bedrooms', 'population', 'households', 'median_income']
+    categorical_features = ['ocean_proximity']
     
-    # Create a ColumnTransformer to handle both numeric and categorical data
-    numeric_transformer = Pipeline(steps=[
+    # Create preprocessing pipelines for both numeric and categorical data
+    numerical_pipeline = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
     ])
     
-    categorical_transformer = Pipeline(steps=[
+    categorical_pipeline = Pipeline(steps=[
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('onehot', OneHotEncoder(handle_unknown='ignore'))
     ])
     
+    # Combine the pipelines into a single ColumnTransformer
     preprocessor = ColumnTransformer(
         transformers=[
-            ('num', numeric_transformer, numeric_features),
-            ('cat', categorical_transformer, categorical_features)
+            ('num', numerical_pipeline, numerical_features),
+            ('cat', categorical_pipeline, categorical_features)
         ])
     
-    # Apply transformations
+    # Fit and transform the data
     X_preprocessed = preprocessor.fit_transform(X)
     return X_preprocessed
 
 class Model:
     def __init__(self):
-        # Initialize a RandomForestRegressor with hyperparameters
-        self.model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+        self.model = GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, max_depth=4, random_state=42)
         self.preprocessor = None
 
     def fit(self, X, y):
         # Preprocess the data
         self.preprocessor = ColumnTransformer(
             transformers=[
-                ('num', Pipeline(steps=[
+                ('num', Pipeline([
                     ('imputer', SimpleImputer(strategy='median')),
                     ('scaler', StandardScaler())
-                ]), X.select_dtypes(include=['float64']).columns.tolist()),
-                ('cat', Pipeline(steps=[
+                ]), ['longitude', 'latitude', 'housing_median_age', 'total_rooms', 
+                     'total_bedrooms', 'population', 'households', 'median_income']),
+                ('cat', Pipeline([
                     ('imputer', SimpleImputer(strategy='most_frequent')),
                     ('onehot', OneHotEncoder(handle_unknown='ignore'))
-                ]), X.select_dtypes(include=['object']).columns.tolist())
+                ]), ['ocean_proximity'])
             ])
         
         X_preprocessed = self.preprocessor.fit_transform(X)
-        # Fit the model
         self.model.fit(X_preprocessed, y)
 
     def predict(self, X):
-        # Preprocess the data
         X_preprocessed = self.preprocessor.transform(X)
-        # Make predictions
         return self.model.predict(X_preprocessed)

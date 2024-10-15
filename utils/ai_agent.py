@@ -116,6 +116,7 @@ class AIAgent:
 
         Follow best practices for data preparation (encoding, scaling...) and machine learning.
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
+        Start simple, with the necessary, and improve progressively.
 
         Provide only the runnable code in the specified format.
         The code you generate will be exported to a Python compiler for evaluation:
@@ -125,6 +126,8 @@ class AIAgent:
         y_pred = model.predict(data['X_val'])
         ```
         Ensure the code is complete and executable without any additional context or explanation outside the code itself.
+
+        Start simply, improve progressively.
         """
         
         return prompt

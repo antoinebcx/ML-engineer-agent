@@ -77,8 +77,8 @@ class AIAgent:
         2. Define a function called 'preprocess_data(X)' that takes a DataFrame X and returns preprocessed features
         3. Define a class called 'Model' with the following methods:
            - __init__(self): Initialize the model
-           - fit(self, X, y): Fit the model to the data
-           - predict(self, X): Make predictions
+           - fit(self, X, y): Fit the model to the data (do not include any additional parameters)
+           - predict(self, X): Make predictions (do not include any additional parameters)
         4. Do not include any code to load data, train/test split or evaluate the model
         5. Do not use heavy grid search or automated hyperparameter optimization methods as it is an iterative process
 
@@ -118,14 +118,14 @@ class AIAgent:
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
 
         Provide only the runnable code in the specified format.
+        IMPORTANT: Do not add any parameters to the fit() or predict() methods beyond X and y for fit(), and X for predict(). Features like early stopping, validation sets, or verbose output should be handled internally if you choose to use them.
         The code you generate will be exported to a Python compiler for evaluation:
         ```python
         model = generated_model.Model()
         model.fit(data['X_train'], data['y_train'])
         y_pred = model.predict(data['X_val'])
         ```
-        Do not add any other arguments in the `fit` or `predict` methods, they should be executable as just described.
-        Ensure the code complete and executable without any additional context or explanation outside the code itself.
+        Ensure the code is complete and executable without any additional context or explanation outside the code itself.
         """
         
         return prompt

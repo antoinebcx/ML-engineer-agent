@@ -8,7 +8,7 @@ class ModelEvaluator:
         self.task_type = task_type
 
     def evaluate_code(self, code, data):
-        try:            
+        try:
             # Save the cleaned code to a temporary file
             with open('temp_model.py', 'w') as f:
                 f.write(code)
@@ -21,7 +21,19 @@ class ModelEvaluator:
 
             # Create and train the model
             model = temp_model.Model()
-            model.fit(data['X_train'], data['y_train'])
+            
+            # Define additional arguments for gradient boosting methods
+            fit_args = {
+                'eval_set': [(data['X_val'], data['y_val'])],
+                'early_stopping_rounds': 10,
+                'verbose': False
+            }
+            # Try to fit the model with additional arguments, fall back to standard fit if it fails
+            try:
+                model.fit(data['X_train'], data['y_train'], **fit_args)
+            except TypeError:
+                # If additional arguments are not supported, use standard fit
+                model.fit(data['X_train'], data['y_train'])
 
             # Make predictions
             y_pred = model.predict(data['X_val'])
@@ -34,9 +46,9 @@ class ModelEvaluator:
                 print(f"RMSE: {rmse}, R²: {r2}")
             elif self.task_type == 'classification':
                 f1 = f1_score(data['y_val'], y_pred, average='weighted')
-                accuracy = accuracy_score(data['y_val'], y_pred, average='weighted')
+                accuracy = accuracy_score(data['y_val'], y_pred)
                 score = f1
-                print(f"F-score: {score}, Accuracy: {accuracy}")
+                print(f"F1-score: {score}, Accuracy: {accuracy}")
 
             # Get features used
             features_used = list(data['X_train'].columns)  # Assumes all features are used
@@ -44,4 +56,4 @@ class ModelEvaluator:
             return score, features_used
         except Exception as e:
             print(f"Error evaluating code: {str(e)}")
-            return float('-inf'), [], {}
+            return float('-inf'), []

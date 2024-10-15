@@ -118,7 +118,6 @@ class AIAgent:
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
 
         Provide only the runnable code in the specified format.
-        IMPORTANT: Do not add any parameters to the fit() or predict() methods beyond X and y for fit(), and X for predict(). Features like early stopping, validation sets, or verbose output should be handled internally if you choose to use them.
         The code you generate will be exported to a Python compiler for evaluation:
         ```python
         model = generated_model.Model()

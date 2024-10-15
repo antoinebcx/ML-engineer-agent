@@ -69,8 +69,6 @@ class AIAgent:
         Based on this information, you have to build an even better model, focusing on:
         1. Feature selection and engineering
         2. Model architecture (appropriate for {self.task_type})
-        3. Hyperparameter tuning
-        4. Ensemble methods (if appropriate)
 
         ----
 
@@ -79,9 +77,10 @@ class AIAgent:
         2. Define a function called 'preprocess_data(X)' that takes a DataFrame X and returns preprocessed features
         3. Define a class called 'Model' with the following methods:
            - __init__(self): Initialize the model
-           - fit(self, X, y): Fit the model to the data
-           - predict(self, X): Make predictions
-        4. Do not include any code to load data or evaluate the model
+           - fit(self, X, y): Fit the model to the data (do not include any additional parameters)
+           - predict(self, X): Make predictions (do not include any additional parameters)
+        4. Do not include any code to load data, train/test split or evaluate the model
+        5. Do not use heavy grid search or automated hyperparameter optimization methods as it is an iterative process
 
         Example structure:
         ```python
@@ -113,14 +112,19 @@ class AIAgent:
         ----
 
         You have access to the following libraries:
-        pandas, numpy, scikit-learn, lightgbm, xgboost
+        pandas, numpy, scikit-learn, xgboost
 
         Follow best practices for data preparation (encoding, scaling...) and machine learning.
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
 
         Provide only the runnable code in the specified format.
-        The code you generate will be exported to a Python compiler for evaluation,
-        so ensure it's complete and executable without any additional context or explanation outside the code itself.
+        The code you generate will be exported to a Python compiler for evaluation:
+        ```python
+        model = generated_model.Model()
+        model.fit(data['X_train'], data['y_train'])
+        y_pred = model.predict(data['X_val'])
+        ```
+        Ensure the code is complete and executable without any additional context or explanation outside the code itself.
         """
         
         return prompt

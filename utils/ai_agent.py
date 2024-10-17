@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from typing import List, Dict
 import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
 
 @dataclass
 class ModelIteration:
@@ -18,13 +22,25 @@ class AIAgent:
         self.task_type = task_type
         self.best_model = None
         self.iteration_history = []
+        self.feature_importance = None
+        self.original_features = None
 
     def optimize(self, num_iterations=20):
+        try:
+            self._calculate_feature_importance()
+        except Exception as e:
+            print(f"Error calculating feature importance: {str(e)}")
+            print("Continuing optimization without feature importance...")
+
         for i in range(num_iterations):
             prompt = self._generate_prompt(i)
             code = self.code_generator.generate_code(prompt)
 
-            score, features_used = self.model_evaluator.evaluate_code(code, self.data_handler.get_data())
+            try:
+                score, features_used = self.model_evaluator.evaluate_code(code, self.data_handler.get_data())
+            except Exception as e:
+                print(f"Error evaluating code in iteration {i+1}: {str(e)}")
+                continue
             
             iteration = ModelIteration(i+1, code, score, features_used)
             self.iteration_history.append(iteration)
@@ -36,19 +52,81 @@ class AIAgent:
             else:
                 print(f"Iteration {i+1}: Score = {score:.4f} (Best: {self.best_model.score:.4f})")
 
+    def _preprocess_data(self, X, y):
+        self.original_features = X.columns.tolist()
+        
+        # Separate numerical and categorical columns
+        num_columns = X.select_dtypes(include=['int64', 'float64']).columns
+        cat_columns = X.select_dtypes(include=['object']).columns
+
+        # Handle missing values for numerical columns
+        if len(num_columns) > 0:
+            num_imputer = SimpleImputer(strategy='mean')
+            X[num_columns] = num_imputer.fit_transform(X[num_columns])
+
+        # Handle missing values and encode categorical columns
+        for column in cat_columns:
+            # Impute missing values with the most frequent value
+            X[column] = X[column].fillna(X[column].mode()[0])
+            # Encode categorical variables
+            le = LabelEncoder()
+            X[column] = le.fit_transform(X[column].astype(str))
+
+        # Convert y to numeric if it's categorical
+        if y.dtype == 'object':
+            le = LabelEncoder()
+            y = le.fit_transform(y.astype(str))
+
+        return X, y
+
+    def _calculate_feature_importance(self):
+        data = self.data_handler.get_data()
+        
+        if not all(key in data for key in ['X_train', 'y_train']):
+            raise ValueError("get_data() should return a dict with at least 'X_train' and 'y_train' keys")
+
+        X, y = data['X_train'], data['y_train']
+
+        # Preprocess the data
+        X, y = self._preprocess_data(X, y)
+
+        # Create LightGBM datasets
+        train_data = lgb.Dataset(X, label=y)
+
+        # Set up parameters
+        params = {
+            'objective': 'regression' if self.task_type == 'regression' else 'multiclass',
+            'metric': 'rmse' if self.task_type == 'regression' else 'multi_logloss',
+            'num_leaves': 31,
+            'learning_rate': 0.05,
+            'feature_fraction': 0.9,
+            'num_iterations': 100,
+            'verbose': -1
+        }
+
+        # Train the model
+        model = lgb.train(params, train_data)
+
+        # Get feature importance
+        feature_importance = model.feature_importance(importance_type='gain')
+        feature_names = model.feature_name()
+        
+        self.feature_importance = sorted(zip(feature_names, feature_importance), key=lambda x: x[1], reverse=True)
+
     def _generate_prompt(self, iteration):
         data_info = self.data_handler.get_data_summary()
         recent_iterations = self.result_manager.get_recent_iterations(5)
         best_iterations = self.result_manager.get_best_iterations(3)
         
-        feature_importance = self._analyze_feature_importance(recent_iterations)
-        
         best_code = self.best_model.code if self.best_model else "No best model yet."
+
+        feature_importance_str = self._format_feature_importance() if self.feature_importance else "Feature importance not available."
 
         prompt = f"""
         You are an expert machine learning engineer tasked with creating the best {self.task_type} model for the given data.
         
         Data summary: {data_info}
+        Original features: {self.original_features}
         Current best score: {self.best_model.score if self.best_model else 'None'}
         Iteration: {iteration + 1}
         
@@ -64,13 +142,14 @@ class AIAgent:
         {self._format_iterations(best_iterations)}
         
         Feature importance analysis:
-        {feature_importance}
+        {feature_importance_str}
 
         Based on this information, you have to build an even better model, focusing on:
-        1. Feature selection and engineering
-        2. Model architecture (appropriate for {self.task_type})
+        1. Data preprocessing (handling missing values, encoding categorical variables)
+        2. Feature engineering
+        3. Model architecture (optimized for {self.task_type})
 
-        ----
+        IMPORTANT: Ensure that your preprocessing step handles ALL input features. Do not drop any features unless you have a specific reason to do so.
 
         The code should follow this structure:
         1. Import necessary libraries
@@ -85,13 +164,30 @@ class AIAgent:
         Example structure:
         ```python
         import numpy as np
+        import pandas as pd
         from sklearn.ensemble import RandomForestRegressor
-        from sklearn.preprocessing import StandardScaler
+        from sklearn.preprocessing import StandardScaler, LabelEncoder
+        from sklearn.impute import SimpleImputer
 
         def preprocess_data(X):
-            # Preprocess the data
-            # ...
-            return X_preprocessed
+            # Separate numerical and categorical columns
+            num_columns = X.select_dtypes(include=['int64', 'float64']).columns
+            cat_columns = X.select_dtypes(include=['object']).columns
+
+            # Handle missing values for numerical columns
+            if len(num_columns) > 0:
+                num_imputer = SimpleImputer(strategy='mean')
+                X[num_columns] = num_imputer.fit_transform(X[num_columns])
+
+            # Handle missing values and encode categorical columns
+            for column in cat_columns:
+                # Impute missing values with the most frequent value
+                X[column] = X[column].fillna(X[column].mode()[0])
+                # Encode categorical variables
+                le = LabelEncoder()
+                X[column] = le.fit_transform(X[column].astype(str))
+            
+            return X
 
         class Model:
             def __init__(self):
@@ -109,13 +205,13 @@ class AIAgent:
                 return self.model.predict(X_scaled)
         ```
 
-        ----
-
         You have access to the following libraries:
         pandas, numpy, scikit-learn, xgboost
 
         Follow best practices for data preparation (encoding, scaling...) and machine learning.
         Consider implementing early stopping and learning rate scheduling for deep learning and gradient boosting models.
+        Start simple, with the necessary, and improve progressively.
+        You can try different approaches to go towards getting the best results.
 
         Provide only the runnable code in the specified format.
         The code you generate will be exported to a Python compiler for evaluation:
@@ -125,6 +221,8 @@ class AIAgent:
         y_pred = model.predict(data['X_val'])
         ```
         Ensure the code is complete and executable without any additional context or explanation outside the code itself.
+
+        Improve progressively on the previous steps.
         """
         
         return prompt
@@ -132,17 +230,8 @@ class AIAgent:
     def _format_iterations(self, iterations):
         return "\n".join([f"Iteration {it.iteration}: Score = {it.score:.4f}, Features = {it.features_used}" for it in iterations])
 
-    def _analyze_feature_importance(self, iterations):
-        feature_scores = {}
-        for it in iterations:
-            for feature in it.features_used:
-                if feature not in feature_scores:
-                    feature_scores[feature] = []
-                feature_scores[feature].append(it.score)
-        
-        feature_importance = {feature: np.mean(scores) for feature, scores in feature_scores.items()}
-        sorted_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)
-        return "Most important features (based on average score): " + ", ".join([f"{feature} ({score:.4f})" for feature, score in sorted_features[:5]])
+    def _format_feature_importance(self):
+        return "Most important features: " + ", ".join([f"{feature} ({importance:.4f})" for feature, importance in self.feature_importance])
 
     def get_best_model(self):
         return self.best_model
